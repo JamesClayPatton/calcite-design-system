@@ -221,7 +221,7 @@ export class Notice extends LitElement {
     );
 
     return (
-      <div class={CSS.container} ref={this.transitionRef}>
+      <div class={CSS.container} inert={!this.open} ref={this.transitionRef}>
         {this.requestedIcon ? (
           <div class={CSS.icon}>
             <calcite-icon

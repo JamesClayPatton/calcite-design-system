@@ -55,6 +55,29 @@ it("renders an icon and close button when requested", async () => {
   expect(icon).not.toBeNull();
 });
 
+it("hides content from assistive technology and keyboard users when closed", async () => {
+  const page = await newE2EPage();
+  await page.setContent(
+    html`<calcite-notice closable> ${noticeContent} </calcite-notice>
+      <button id="after-notice" type="button">After notice</button>`,
+  );
+
+  async function getAccessibilityTree(): Promise<string> {
+    return JSON.stringify(await page.accessibility.snapshot({ interestingOnly: false }));
+  }
+
+  expect(await getAccessibilityTree()).not.toContain("Message Text");
+
+  await page.keyboard.press("Tab");
+  expect(await page.evaluate(() => document.activeElement.id)).toBe("after-notice");
+
+  const element = await page.find("calcite-notice");
+  element.setProperty("open", true);
+  await page.waitForChanges();
+
+  expect(await getAccessibilityTree()).toContain("Message Text");
+});
+
 it("successfully closes a closable notice", async () => {
   const page = await newE2EPage();
   await page.setContent(html`<calcite-notice id="notice-1" open closable> ${noticeContent} </calcite-notice>`);
